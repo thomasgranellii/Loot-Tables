@@ -1,0 +1,53 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LootScript : MonoBehaviour {
+
+    [System.Serializable]
+    public class DropCurrency
+    {
+        public string name;                                             // checks all the possible items you can find/loot
+        public GameObject item;                                         // creates all the items in the gameobject
+        public int dropRarity;                                          // gives every item their own rarity
+    }
+
+    public List<DropCurrency> lootTable = new List<DropCurrency>();     // creates a list in the inspector (name, item, rarity)
+    public int dropChance;                                              // sets a true drop chance on click; 50/50 of getting loot
+
+	public void CalculateLoot()
+    {
+        int calc_dropChance = Random.Range(0, 101);                     // this is the calculated drop chance to even get loot 
+                                                                        // I set it to 101 because I want the chance of 100%
+        if(calc_dropChance > dropChance)                                // our drop chance is already set to 50 so if we roll the calc_dropchance it ends the program and you didnt get loot
+        {
+            Debug.Log("You didnt get loot!");
+            return;                                                     // if you dont get loot restart the process over again aka GO HOME
+        }
+
+        if(calc_dropChance <= dropChance)                               // now if we hit drop chance we get loot!
+        {
+            int itemWeight = 0;                                         // gives eavh iteam their own "weight" or rarity
+
+            for(int i = 0; i < lootTable.Count; i++)                    // loops through the list and gives all the items weight
+            {
+                itemWeight += lootTable [i].dropRarity;                  // add all the intergers from droprarity to the item weight (80 + 40 + 20 + 5 = 145)
+            }
+            Debug.Log("itemWeight = " + itemWeight);                    // tells you the wight of the item and the console outputs the name of the item
+
+            int randomValue = Random.Range(0, itemWeight);              // pick any number within 0 and the item weight range
+
+            for(int j = 0; j < lootTable.Count; j++)                    // loops through the list again and checks the random value we have calculated 
+            {
+                if(randomValue <= lootTable [j].dropRarity)              // checks the items in the list to see if their value matches the random value produced
+                {
+                    Instantiate(lootTable [j].item,transform.position,Quaternion.identity);
+                    return;
+                }
+                randomValue -= lootTable [j].dropRarity;                 // this line makes sure all random numbers give the possibility to drop an item
+                Debug.Log("Random Value Decreased" + randomValue);       // so that it doesnt produce a number not designated to an item
+            }                                                            
+
+        }
+    }
+}
